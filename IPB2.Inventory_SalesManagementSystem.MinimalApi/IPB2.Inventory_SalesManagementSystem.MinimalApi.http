@@ -1,0 +1,6 @@
+@IPB2.Inventory_SalesManagementSystem.MinimalApi_HostAddress = http://localhost:5262
+
+GET {{IPB2.Inventory_SalesManagementSystem.MinimalApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

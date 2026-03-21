@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="IPB2.Inventory&amp;SalesManagementSystem.DB/IPB2.Inventory_SalesManagementSystem.DB.csproj" />
+  <Project Path="IPB2.Inventory_SalesManagementSystem.Api/IPB2.Inventory_SalesManagementSystem.Api.csproj" Id="9142f68d-b7e0-4e77-a13b-43881f07ea3a" />
+  <Project Path="IPB2.Inventory_SalesManagementSystem.ConsoleApp/IPB2.Inventory_SalesManagementSystem.ConsoleApp.csproj" Id="a2be3e7b-959e-473d-b9ad-a1534a5d84c4" />
+  <Project Path="IPB2.Inventory_SalesManagementSystem.MinimalApi1/IPB2.Inventory_SalesManagementSystem.MinimalApi1.csproj" Id="a250acf3-57b7-41a0-bcee-5de020d6208a" />
+  <Project Path="IPB2.Inventory_SalesManagementSystem.WindowForm/IPB2.Inventory_SalesManagementSystem.WindowForm.csproj" Id="dafef67d-751f-4210-803e-c972897233aa" />
+</Solution>
