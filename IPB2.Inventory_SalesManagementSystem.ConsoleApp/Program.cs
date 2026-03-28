@@ -1,4 +1,5 @@
-﻿using IPB2.Inventory_SalesManagementSystem.DB.Models;
+using IPB2.Inventory_SalesManagementSystem.ConsoleApp.Services;
+using IPB2.Inventory_SalesManagementSystem.DB.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -7,11 +8,20 @@ var host = Host.CreateDefaultBuilder(args)
 .ConfigureServices((hostContext, services) =>
 {
     services.AddDbContext<InventorySalesDbContext>();
+    services.AddScoped<ISupplierService, SupplierService>();
+    services.AddScoped<IProductService, ProductService>();
+    services.AddScoped<IStockService, StockService>();
+    services.AddScoped<ISalesService, SalesService>();
+    services.AddScoped<IReportService, ReportService>();
 })
 .Build();
 
 using var scope = host.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<InventorySalesDbContext>();
+var supplierService = scope.ServiceProvider.GetRequiredService<ISupplierService>();
+var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
+var stockService = scope.ServiceProvider.GetRequiredService<IStockService>();
+var salesService = scope.ServiceProvider.GetRequiredService<ISalesService>();
+var reportService = scope.ServiceProvider.GetRequiredService<IReportService>();
 
 bool exit = false;
 
@@ -33,11 +43,11 @@ while (!exit)
 
     switch (choice)
     {
-        case "1": await SupplierMenu(db); break;
-        case "2": await ProductMenu(db); break;
-        case "3": await StockMenu(db); break;
-        case "4": await SalesMenu(db); break;
-        case "5": await ReportMenu(db); break;
+        case "1": await SupplierMenu(supplierService); break;
+        case "2": await ProductMenu(productService); break;
+        case "3": await StockMenu(stockService); break;
+        case "4": await SalesMenu(salesService); break;
+        case "5": await ReportMenu(reportService); break;
         case "6": exit = true; break;
         default:
             Console.WriteLine("Invalid choice!");
@@ -47,11 +57,11 @@ while (!exit)
 }
 
 #region Supplier Menu
-async Task SupplierMenu(InventorySalesDbContext db)
+async Task SupplierMenu(ISupplierService service)
 {
     Console.Clear();
 
-    var list = await db.Suppliers.ToListAsync();
+    var list = await service.GetSuppliersAsync();
 
     foreach (var s in list)
         Console.WriteLine($"{s.SupplierID} - {s.CompanyName}");
@@ -62,11 +72,11 @@ async Task SupplierMenu(InventorySalesDbContext db)
 #endregion
 
 #region Product Menu
-async Task ProductMenu(InventorySalesDbContext db)
+async Task ProductMenu(IProductService service)
 {
     Console.Clear();
 
-    var list = await db.Products.ToListAsync();
+    var list = await service.GetProductsAsync();
 
     foreach (var p in list)
         Console.WriteLine($"{p.ProductID} - {p.ProductName} | Stock: {p.QuantityInStock}");
@@ -77,7 +87,7 @@ async Task ProductMenu(InventorySalesDbContext db)
 #endregion
 
 #region Stock Menu
-async Task StockMenu(InventorySalesDbContext db)
+async Task StockMenu(IStockService service)
 {
     Console.Clear();
 
@@ -88,56 +98,25 @@ async Task StockMenu(InventorySalesDbContext db)
     int qty = int.Parse(Console.ReadLine() ?? "0");
 
     Console.Write("Type (IN/OUT): ");
-    var type = Console.ReadLine();
+    var type = Console.ReadLine() ?? "";
 
-    var product = await db.Products
-        .FirstOrDefaultAsync(x => x.ProductID == productId);
+    var result = await service.UpdateStockAsync(productId, qty, type);
 
-    if (product == null)
+    if (!result.success)
     {
-        Console.WriteLine("Product not found");
-        Console.ReadKey();
-        return;
-    }
-
-    if (type == "IN")
-    {
-        product.QuantityInStock += qty;
-    }
-    else if (type == "OUT")
-    {
-        if (product.QuantityInStock < qty)
-        {
-            Console.WriteLine("Not enough stock!");
-            Console.ReadKey();
-            return;
-        }
-
-        product.QuantityInStock -= qty;
+        Console.WriteLine(result.message);
     }
     else
     {
-        Console.WriteLine("Invalid type!");
-        Console.ReadKey();
-        return;
+        Console.WriteLine(result.message);
     }
 
-    db.StockTransactions.Add(new StockTransaction
-    {
-        ProductID = productId,
-        Quantity = qty,
-        TransactionType = type
-    });
-
-    await db.SaveChangesAsync();
-
-    Console.WriteLine("Stock updated!");
     Console.ReadKey();
 }
 #endregion
 
 #region Sales Menu
-async Task SalesMenu(InventorySalesDbContext db)
+async Task SalesMenu(ISalesService service)
 {
     Console.Clear();
 
@@ -150,49 +129,29 @@ async Task SalesMenu(InventorySalesDbContext db)
     Console.Write("Quantity: ");
     int qty = int.Parse(Console.ReadLine() ?? "0");
 
-    var product = await db.Products
-        .FirstOrDefaultAsync(x => x.ProductID == productId);
+    var result = await service.ProcessSaleAsync(staffId, productId, qty);
 
-    if (product == null || product.QuantityInStock < qty)
+    if (!result.success)
     {
-        Console.WriteLine("Invalid product or insufficient stock");
-        Console.ReadKey();
-        return;
+        Console.WriteLine(result.message);
+    }
+    else
+    {
+        Console.WriteLine(result.message);
     }
 
-    decimal subtotal = (decimal)(qty * product.Price);
-
-    var sale = new Sale
-    {
-        StaffID = staffId,
-        TotalAmount = subtotal,
-        SaleDate = DateTime.Now
-    };
-
-    db.Sales.Add(sale);
-    await db.SaveChangesAsync();
-
-    db.SaleItems.Add(new SaleItem { SaleID = (int)sale.SaleID, ProductID = productId, Quantity = qty, Price = (decimal)product.Price, SubTotal = subtotal });
-
-    product.QuantityInStock -= qty;
-
-    await db.SaveChangesAsync();
-
-    Console.WriteLine("Sale completed!");
     Console.ReadKey();
 }
 #endregion
 
 #region Report Menu
-async Task ReportMenu(InventorySalesDbContext db)
+async Task ReportMenu(IReportService service)
 {
     Console.Clear();
 
     Console.WriteLine("=== LOW STOCK PRODUCTS (<10) ===");
 
-    var list = await db.Products
-        .Where(x => x.QuantityInStock < 10)
-        .ToListAsync();
+    var list = await service.GetLowStockProductsAsync(10);
 
     foreach (var p in list)
     {
@@ -201,6 +160,5 @@ async Task ReportMenu(InventorySalesDbContext db)
 
     Console.WriteLine("Press any key...");
     Console.ReadKey();
-
 }
 #endregion

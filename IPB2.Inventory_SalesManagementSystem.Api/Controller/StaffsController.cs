@@ -1,4 +1,6 @@
-﻿using IPB2.Inventory_SalesManagementSystem.DB.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models.Staffs;
+using IPB2.Inventory_SalesManagementSystem.DB.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +21,13 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(await _db.Staffs.ToListAsync());
+            var data = await _db.Staffs.ToListAsync();
+            return Ok(new StaffListResponse
+            {
+                IsSuccess = true,
+                Message = "Success",
+                Data = data
+            });
         }
 
         [HttpPost]
@@ -27,7 +35,12 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         {
             _db.Staffs.Add(model);
             await _db.SaveChangesAsync();
-            return Ok(model);
+            return Ok(new StaffResponse
+            {
+                IsSuccess = true,
+                Message = "Staff created successfully",
+                Data = model
+            });
         }
 
         [HttpPut]
@@ -35,18 +48,34 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         {
             _db.Staffs.Update(model);
             await _db.SaveChangesAsync();
-            return Ok(model);
+            return Ok(new StaffResponse
+            {
+                IsSuccess = true,
+                Message = "Staff updated successfully",
+                Data = model
+            });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var data = await _db.Staffs.FindAsync(id);
-            if (data == null) return NotFound();
+            if (data == null)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    IsSuccess = false,
+                    Message = "Staff not found"
+                });
+            }
 
             _db.Staffs.Remove(data);
             await _db.SaveChangesAsync();
-            return Ok();
+            return Ok(new BaseResponse<object>
+            {
+                IsSuccess = true,
+                Message = "Staff deleted successfully"
+            });
         }
     }
 }

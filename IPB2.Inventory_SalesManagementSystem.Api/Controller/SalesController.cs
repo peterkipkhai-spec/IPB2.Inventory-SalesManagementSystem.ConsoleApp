@@ -1,4 +1,6 @@
-﻿using IPB2.Inventory_SalesManagementSystem.DB.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models.Sales;
+using IPB2.Inventory_SalesManagementSystem.DB.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,16 +18,22 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateSale(int staffId, List<SaleItem> items)
+        public async Task<IActionResult> CreateSale(CreateSaleRequest request)
         {
             decimal total = 0;
 
-            foreach (var item in items)
+            foreach (var item in request.Items)
             {
                 var product = await _db.Products.FindAsync(item.ProductId);
 
                 if (product == null || product.QuantityInStock < item.Quantity)
-                    return BadRequest("Invalid product or insufficient stock");
+                {
+                    return BadRequest(new SaleResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid product or insufficient stock"
+                    });
+                }
 
                 item.Price = (decimal)product.Price;
                 item.SubTotal = item.Quantity * item.Price;
@@ -37,7 +45,7 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
 
             var sale = new Sale
             {
-                StaffId = staffId,
+                StaffId = request.StaffId,
                 TotalAmount = total,
                 SaleDate = DateTime.Now
             };
@@ -45,7 +53,7 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
             _db.Sales.Add(sale);
             await _db.SaveChangesAsync();
 
-            foreach (var item in items)
+            foreach (var item in request.Items)
             {
                 item.SaleId = sale.SaleId;
                 _db.SaleItems.Add(item);
@@ -53,7 +61,12 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
 
             await _db.SaveChangesAsync();
 
-            return Ok(sale);
+            return Ok(new SaleResponse
+            {
+                IsSuccess = true,
+                Message = "Sale created successfully",
+                Data = sale
+            });
         }
     }
 }

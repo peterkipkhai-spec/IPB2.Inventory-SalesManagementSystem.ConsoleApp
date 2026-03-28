@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 using IPB2.Inventory_SalesManagementSystem.DB.Models;
@@ -8,12 +8,14 @@ namespace IPB2.Inventory_SalesManagementSystem.WindowForm.Forms
 {
     public partial class StockForm : Form
     {
-        private readonly ProductService _productService = new ProductService();
-        private readonly StockService _stockService = new StockService();
+        private readonly IProductService _productService;
+        private readonly IStockService _stockService;
 
-        public StockForm()
+        public StockForm(IProductService productService, IStockService stockService)
         {
             InitializeComponent();
+            _productService = productService;
+            _stockService = stockService;
         }
 
         private void StockForm_Load(object sender, EventArgs e)

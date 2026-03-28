@@ -1,4 +1,4 @@
-﻿using IPB2.Inventory_SalesManagementSystem.DB.Models;
+using IPB2.Inventory_SalesManagementSystem.DB.Models;
 using IPB2.Inventory_SalesManagementSystem.WindowForm.Data;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IPB2.Inventory_SalesManagementSystem.WindowForm.Services
 {
-    public class StockService
+    public class StockService : IStockService
     {
         public void StockIn(int productId, int qty)
         {

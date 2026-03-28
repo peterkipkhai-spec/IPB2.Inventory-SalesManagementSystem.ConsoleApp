@@ -1,4 +1,6 @@
-﻿using IPB2.Inventory_SalesManagementSystem.DB.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models.Products;
+using IPB2.Inventory_SalesManagementSystem.DB.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +17,6 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controllers
             _db = new InventorySalesDbContext();
         }
 
-        public object PageNo { get; private set; }
-        public object PageSize { get; private set; }
-        public object TotalCount { get; private set; }
-
         // Basic List
         [HttpGet]
         public async Task<IActionResult> GetAsync(int pageNo, int pageSize)
@@ -28,7 +26,12 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
-            return Ok(lst);
+            return Ok(new ProductListResponse
+            {
+                IsSuccess = true,
+                Message = "Success",
+                Data = lst
+            });
         }
 
         // Full Pagination
@@ -60,13 +63,18 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(new
+            return Ok(new ProductPagedResponse
             {
-                PageNo = pageNo,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                PageCount = (int)Math.Ceiling(totalCount / (double)pageSize),
-                Data = data
+                IsSuccess = true,
+                Message = "Success",
+                Data = new ProductPagedData
+                {
+                    PageNo = pageNo,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    PageCount = (int)Math.Ceiling(totalCount / (double)pageSize),
+                    Data = data
+                }
             });
         }
 
@@ -97,14 +105,19 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
-            return Ok(new
+            return Ok(new ProductPagedResponse
             {
-                PageNo,
-                PageSize,
-                TotalCount,
-                PageCount = (int)Math.Ceiling(totalCount / (double)pageSize),
-                Data = data
+                IsSuccess = true,
+                Message = "Success",
+                Data = new ProductPagedData
+                {
+                    PageNo = pageNo,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    PageCount = (int)Math.Ceiling(totalCount / (double)pageSize),
+                    Data = data
+                }
             });
         }
     }
-}
+}

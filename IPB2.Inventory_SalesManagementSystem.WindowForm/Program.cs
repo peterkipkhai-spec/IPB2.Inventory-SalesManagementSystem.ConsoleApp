@@ -25,12 +25,12 @@ namespace IPB2.Inventory_SalesManagementSystem.WindowForm
                     services.AddDbContext<InventorySalesDbContext>();
 
                     // Services
-                    services.AddScoped<SupplierService>();
-                    services.AddScoped<CategoryService>();
-                    services.AddScoped<ProductService>();
-                    services.AddScoped<StaffService>();
-                    services.AddScoped<StockService>();
-                    services.AddScoped<SalesService>();
+                    services.AddScoped<ISupplierService, SupplierService>();
+                    services.AddScoped<ICategoryService, CategoryService>();
+                    services.AddScoped<IProductService, ProductService>();
+                    services.AddScoped<IStaffService, StaffService>();
+                    services.AddScoped<IStockService, StockService>();
+                    services.AddScoped<ISalesService, SalesService>();
 
                     // Forms
                     services.AddTransient<MainForm>();
@@ -39,7 +39,7 @@ namespace IPB2.Inventory_SalesManagementSystem.WindowForm
                     services.AddTransient<ProductForm>();
                     services.AddTransient<StaffForm>();
                     services.AddTransient<StockForm>();
-                    services.AddTransient<SalesForm>();
+                    services.AddTransient<SaleForm>();
                     services.AddTransient<ReportForm>();
                 })
                 .Build();

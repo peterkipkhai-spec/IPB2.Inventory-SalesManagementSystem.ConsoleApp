@@ -1,4 +1,6 @@
-﻿using IPB2.Inventory_SalesManagementSystem.DB.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models.Suppliers;
+using IPB2.Inventory_SalesManagementSystem.DB.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +12,6 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
     public class SuppliersController : ControllerBase
     {
         private readonly InventorySalesDbContext _db;
-
-        public object PageNo { get; private set; }
-        public object PageSize { get; private set; }
-        public object TotalCount { get; private set; }
 
         public SuppliersController()
         {
@@ -32,13 +30,18 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
                 .Take(pageSize)
                 .ToListAsync();
 
-            return Ok(new
+            return Ok(new SupplierPagedResponse
             {
-                PageNo,
-                PageSize,
-                TotalCount,
-                PageCount = (int)Math.Ceiling(totalCount / (double)pageSize),
-                Data = data
+                IsSuccess = true,
+                Message = "Success",
+                Data = new SupplierPagedData
+                {
+                    PageNo = pageNo,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    PageCount = (int)Math.Ceiling(totalCount / (double)pageSize),
+                    Data = data
+                }
             });
         }
 
@@ -47,7 +50,12 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         {
             _db.Suppliers.Add(model);
             await _db.SaveChangesAsync();
-            return Ok(model);
+            return Ok(new SupplierResponse
+            {
+                IsSuccess = true,
+                Message = "Supplier created successfully",
+                Data = model
+            });
         }
 
         [HttpPut]
@@ -55,18 +63,34 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         {
             _db.Suppliers.Update(model);
             await _db.SaveChangesAsync();
-            return Ok(model);
+            return Ok(new SupplierResponse
+            {
+                IsSuccess = true,
+                Message = "Supplier updated successfully",
+                Data = model
+            });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var data = await _db.Suppliers.FindAsync(id);
-            if (data == null) return NotFound();
+            if (data == null)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    IsSuccess = false,
+                    Message = "Supplier not found"
+                });
+            }
 
             _db.Suppliers.Remove(data);
             await _db.SaveChangesAsync();
-            return Ok();
+            return Ok(new BaseResponse<object>
+            {
+                IsSuccess = true,
+                Message = "Supplier deleted successfully"
+            });
         }
     }
 }

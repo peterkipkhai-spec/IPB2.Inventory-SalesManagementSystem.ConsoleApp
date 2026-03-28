@@ -1,9 +1,11 @@
 using IPB2.Inventory_SalesManagementSystem.DB.Models;
 using IPB2.Inventory_SalesManagementSystem.WindowForm.Data;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IPB2.Inventory_SalesManagementSystem.WindowForm.Services
 {
-	public class SupplierService
+	public class SupplierService : ISupplierService
 	{
 		public List<Supplier> GetAll()
 		{

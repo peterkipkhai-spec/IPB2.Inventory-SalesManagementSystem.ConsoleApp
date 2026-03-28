@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 using IPB2.Inventory_SalesManagementSystem.DB.Models;
@@ -8,13 +8,16 @@ namespace IPB2.Inventory_SalesManagementSystem.WindowForm.Forms
 {
     public partial class ProductForm : Form
     {
-        private readonly ProductService _productService = new ProductService();
-        private readonly CategoryService _categoryService = new CategoryService();
-        private readonly SupplierService _supplierService = new SupplierService();
+        private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService;
+        private readonly ISupplierService _supplierService;
 
-        public ProductForm()
+        public ProductForm(IProductService productService, ICategoryService categoryService, ISupplierService supplierService)
         {
             InitializeComponent();
+            _productService = productService;
+            _categoryService = categoryService;
+            _supplierService = supplierService;
         }
 
         private void ProductForm_Load(object sender, EventArgs e)

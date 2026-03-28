@@ -1,4 +1,6 @@
-﻿using IPB2.Inventory_SalesManagementSystem.DB.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models;
+using IPB2.Inventory_SalesManagementSystem.Api.Models.Categories;
+using IPB2.Inventory_SalesManagementSystem.DB.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +21,13 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(await _db.Categories.ToListAsync());
+            var data = await _db.Categories.ToListAsync();
+            return Ok(new CategoryListResponse
+            {
+                IsSuccess = true,
+                Message = "Success",
+                Data = data
+            });
         }
 
         [HttpPost]
@@ -27,7 +35,12 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         {
             _db.Categories.Add(model);
             await _db.SaveChangesAsync();
-            return Ok(model);
+            return Ok(new CategoryResponse
+            {
+                IsSuccess = true,
+                Message = "Category created successfully",
+                Data = model
+            });
         }
 
         [HttpPut]
@@ -35,18 +48,34 @@ namespace IPB2.Inventory_SalesManagementSystem.Api.Controller
         {
             _db.Categories.Update(model);
             await _db.SaveChangesAsync();
-            return Ok(model);
+            return Ok(new CategoryResponse
+            {
+                IsSuccess = true,
+                Message = "Category updated successfully",
+                Data = model
+            });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var data = await _db.Categories.FindAsync(id);
-            if (data == null) return NotFound();
+            if (data == null)
+            {
+                return NotFound(new BaseResponse<object>
+                {
+                    IsSuccess = false,
+                    Message = "Category not found"
+                });
+            }
 
             _db.Categories.Remove(data);
             await _db.SaveChangesAsync();
-            return Ok();
+            return Ok(new BaseResponse<object>
+            {
+                IsSuccess = true,
+                Message = "Category deleted successfully"
+            });
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -9,11 +9,12 @@ namespace IPB2.Inventory_SalesManagementSystem.WindowForm.Forms
 {
     public partial class SupplierForm : Form
     {
-        private readonly SupplierService _supplierService = new SupplierService();
+        private readonly ISupplierService _supplierService;
 
-        public SupplierForm()
+        public SupplierForm(ISupplierService supplierService)
         {
             InitializeComponent();
+            _supplierService = supplierService;
         }
 
         private void SupplierForm_Load(object sender, EventArgs e)

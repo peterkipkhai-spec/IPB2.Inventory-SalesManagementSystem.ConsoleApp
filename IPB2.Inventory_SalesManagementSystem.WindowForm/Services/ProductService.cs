@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
     
 namespace IPB2.Inventory_SalesManagementSystem.WindowForm.Services
 {
-    public class ProductService
+    public class ProductService : IProductService
     {
         public List<Product> GetAll()
         {
